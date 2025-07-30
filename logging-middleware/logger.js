@@ -1,8 +1,9 @@
 
 import axios from "axios";
-
+import dotenv from "dotenv";
+dotenv.config();
 const LOGGING_URL = "http://20.244.56.144/evaluation-service/logs";
-const TOKEN = "Bearer YOUR_ACCESS_TOKEN";
+const TOKEN = process.env.ACCESS_TOKEN;
 
 
 const VALID_STACKS = ["backend", "frontend"];
@@ -50,9 +51,11 @@ export async function Log(stack, level, pkg, message) {
 
 
 	try {
+		console.log(TOKEN);
+		console.log(LOGGING_URL);
 		const response = await axios.post(LOGGING_URL, logPayload, {
 			headers: {
-				Authorization: TOKEN,
+				Authorization: `Bearer ${TOKEN}`,
 				"Content-Type": "application/json",
 			},
 		});
@@ -61,3 +64,4 @@ export async function Log(stack, level, pkg, message) {
 		console.error(`[Logger] Failed to send log: ${error.message}`);
 	}
 }
+

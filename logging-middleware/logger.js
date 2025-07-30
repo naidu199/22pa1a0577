@@ -51,8 +51,7 @@ export async function Log(stack, level, pkg, message) {
 
 
 	try {
-		console.log(TOKEN);
-		console.log(LOGGING_URL);
+		console.log(`[Logger] Sending log: ${stack}/${pkg}/${level} - ${message}`);
 		const response = await axios.post(LOGGING_URL, logPayload, {
 			headers: {
 				Authorization: `Bearer ${TOKEN}`,
@@ -61,7 +60,13 @@ export async function Log(stack, level, pkg, message) {
 		});
 		console.log(`[Logger] ${response.data.message} (Log ID: ${response.data.logID})`);
 	} catch (error) {
-		console.error(`[Logger] Failed to send log: ${error.message}`);
+		if (error.response?.status === 401) {
+			console.error(`[Logger] Authentication failed - Token may be expired. Please update ACCESS_TOKEN in .env file`);
+		} else {
+			console.error(`[Logger] Failed to send log: ${error.message}`);
+		}
+		// Log locally as fallback
+		console.log(`[Logger Fallback] ${new Date().toISOString()} - ${stack}/${pkg}/${level}: ${message}`);
 	}
 }
 

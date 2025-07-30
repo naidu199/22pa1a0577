@@ -5,7 +5,7 @@ export const createShortURL = async (req, res) => {
 	const { url, validity = 30, shortcode } = req.body;
 
 	try {
-		// Clean expired URLs first
+
 		cleanExpiredUrls();
 
 		if (!url || !shortcode) {
@@ -13,7 +13,7 @@ export const createShortURL = async (req, res) => {
 			return res.status(400).json({ message: "URL and shortcode are required" });
 		}
 
-		// Validate URL format
+
 		try {
 			new URL(url);
 		} catch (urlError) {
@@ -21,25 +21,25 @@ export const createShortURL = async (req, res) => {
 			return res.status(400).json({ message: "Invalid URL format" });
 		}
 
-		// Check if shortcode already exists and is not expired
+
 		if (urlStore[shortcode] && !isExpired(shortcode)) {
 			await Log("backend", "error", "handler", `Shortcode "${shortcode}" already exists`);
 			return res.status(409).json({ message: "Shortcode already in use" });
 		}
 
-		// Calculate expiry time (validity in minutes)
+
 		const expiryTime = new Date();
 		expiryTime.setMinutes(expiryTime.getMinutes() + validity);
 
-		// Store URL with expiry
+
 		urlStore[shortcode] = {
 			url: url,
 			expiry: expiryTime.toISOString()
 		};
 
 		await Log("backend", "info", "controller", `Shortened URL created: ${shortcode} (expires: ${expiryTime.toISOString()})`);
-		
-		return res.status(201).json({ 
+
+		return res.status(201).json({
 			shortLink: `http://localhost:5000/api/${shortcode}`,
 			expiry: expiryTime.toISOString()
 		});
@@ -51,10 +51,10 @@ export const createShortURL = async (req, res) => {
 
 export const redirectToURL = async (req, res) => {
 	const { shortcode } = req.params;
-	
+
 	// Clean expired URLs first
 	cleanExpiredUrls();
-	
+
 	const entry = urlStore[shortcode];
 
 	if (!entry) {
